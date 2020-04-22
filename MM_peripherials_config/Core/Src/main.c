@@ -20,10 +20,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "../../MPU6050/mpu6050.h"
+#include "move.h"
+#include "encoders.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,6 +50,7 @@ TIM_HandleTypeDef htim4;
 /* USER CODE BEGIN PV */
 volatile uint16_t pulse_count_encR; // Licznik impulsow
 volatile uint16_t pulse_count_encL; // Licznik impulsow
+float ax, ay, az, gx, gy, gz, temperature;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -58,6 +60,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
+
 
 /* USER CODE END PFP */
 
@@ -82,7 +85,14 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  MPU6050_Init(&hi2c1);
 
+  MPU6050_SetInterruptMode(MPU6050_INTMODE_ACTIVEHIGH);
+  MPU6050_SetInterruptDrive(MPU6050_INTDRV_PUSHPULL);
+  MPU6050_SetInterruptLatch(MPU6050_INTLATCH_WAITCLEAR);
+  MPU6050_SetInterruptLatchClear(MPU6050_INTCLEAR_STATUSREAD);
+
+  MPU6050_SetIntEnableRegister(0);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -102,16 +112,42 @@ int main(void)
   int EncValL;
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
+
+  encRead();
+
+  	turn_left();
+  	HAL_Delay(800);
+  	turn_left();
+  	HAL_Delay(800);
+  	turn_right();
+  	HAL_Delay(800);
+  	turn_right();
+
+  	HAL_Delay(800);
+
+  	setMoveR(1,0);
+  	setMoveL(1,0);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
 	  pulse_count_encL = TIM2->CNT; // przepisanie wartosci z rejestru timera 2 do zmiennej
-	  EncValL = pulse_count_encR;
-	  pulse_count_encR = TIM4->CNT; // przepisanie wartosci z rejestru timera 4 do zmiennej
 	  EncValR = pulse_count_encR;
+	  pulse_count_encR = TIM4->CNT; // przepisanie wartosci z rejestru timera 4 do zmiennej
+	  EncValL = pulse_count_encR;
+
+	  encRead();
+
+
+
+
+	  MPU6050_GetAccelerometerScaled(&ax, &ay, &az);
+	  MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
+	  temperature = MPU6050_GetTemperatureCelsius();
 	  HAL_Delay(100);
     /* USER CODE END WHILE */
 
