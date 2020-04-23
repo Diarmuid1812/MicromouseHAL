@@ -20,6 +20,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "../../MPU6050/mpu6050.h"
@@ -141,8 +142,6 @@ int main(void)
 	  EncValL = pulse_count_encR;
 
 	  encRead();
-
-
 
 
 	  MPU6050_GetAccelerometerScaled(&ax, &ay, &az);

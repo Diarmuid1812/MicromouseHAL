@@ -995,8 +995,6 @@ int main(void)
  8000ad0:	f7ff ff0e 	bl	80008f0 <encRead>
 
 
-
-
 	  MPU6050_GetAccelerometerScaled(&ax, &ay, &az);
  8000ad4:	4a10      	ldr	r2, [pc, #64]	; (8000b18 <main+0x104>)
  8000ad6:	4911      	ldr	r1, [pc, #68]	; (8000b1c <main+0x108>)
