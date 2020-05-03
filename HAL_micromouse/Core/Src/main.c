@@ -64,6 +64,13 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//przekierowanie printf dla portu szeregowego
+
+int _write ( int file, char *ptr, int len)
+{
+ HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, 50);
+ return len;
+}
 /* USER CODE END 0 */
 
 /**
@@ -157,17 +164,18 @@ int main(void)
 
 	  //odczyt z enkoderów
 	  encRead();
-
 	  prawy = leftTotal;
 	  lewy = rightTotal;
 
-
-	  HAL_Delay(100);
-
 	  //testowe ustawienie prędkości silników - nie odkomentowywać bo ucieka ze stołu
-	  setMoveR(1, 500);
-	  setMoveL(1, 500);
+	  //setMoveR(1, 500);
+	  //setMoveL(1, 500);
 
+
+	  //test portu szeregowego
+	  printf("Hello world\n");
+
+	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
