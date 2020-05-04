@@ -1,3 +1,4 @@
+"Core/Src/SoftwareCRC.o"
 "Core/Src/VL53L0x.o"
 "Core/Src/encoders.o"
 "Core/Src/gpio.o"

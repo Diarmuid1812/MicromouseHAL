@@ -1,0 +1,2 @@
+SoftwareCRC.c:10:10:crc32	24	static
+SoftwareCRC.c:21:6:makeFrame	80	static

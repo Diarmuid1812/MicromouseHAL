@@ -28,10 +28,12 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "stdio.h"
 #include "VL53L0x.h"
 #include "../../MPU6050/mpu6050.h"
 #include "move.h"
 #include "encoders.h"
+#include "SoftwareCRC.h"
 
 /* USER CODE END Includes */
 
@@ -118,6 +120,9 @@ int main(void)
   uint32_t prawy = 0;
   uint32_t lewy = 0;
 
+  //ramka danych na WDS
+  char frameWDS[50] = {0};
+
   /************************************************************************/
 
   HAL_GPIO_WritePin(GPIOB, RED_LED_Pin, 0);  //zapal LED
@@ -171,9 +176,15 @@ int main(void)
 	  //setMoveR(1, 500);
 	  //setMoveL(1, 500);
 
-
 	  //test portu szeregowego
 	  printf("Hello world\n");
+
+	  //generowanie ramki danych na WDS - na razie przykładowe dane
+	  //makeFrame(frameString,left_encoder,right_encoder,ToF_L,ToF_FL,ToF_F,ToF_FR,ToF_R);
+	  //tak powinna wyglądać gotowa ramka -> "X_00012_00034_0023_0234_0433_3444_0003_1886576405"
+	  makeFrame(frameWDS,12,34,23,234,433,3444,3);
+	  //wysłanie ramki
+	  printf("%s\n", frameWDS);
 
 	  HAL_Delay(1000);
 
