@@ -7,61 +7,97 @@
 
 void ToF_writeReg(struct ToF_struct *ToF, uint8_t reg, uint8_t value)
 {
-	HAL_I2C_Mem_Write(&hi2c1, (ToF->bus_address)<<1, reg, 1, (uint8_t*)&value, 1, HAL_MAX_DELAY);
+	uint8_t data[2];
+
+    data[0] = reg;
+    data[1] = value;
+
+	HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, data, 2, 100);
 }
 
 void ToF_writeReg16Bit(struct ToF_struct *ToF, uint8_t reg, uint16_t value)
 {
-	uint8_t tmp[2];
-	tmp[0]=(uint8_t)value>>8 & 0xFF; //MSB
-	tmp[1]=(uint8_t)value    & 0xFF; //LSB
-	HAL_I2C_Mem_Write(&hi2c1, (ToF->bus_address)<<1, reg, 1, tmp, 2, HAL_MAX_DELAY);
+    uint8_t data[3];
+
+    data[0] = reg;
+    data[1] = (uint8_t)(value >> 8);    // MSB
+    data[2] = (uint8_t)(value     );    // LSB
+
+    HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, data, 3, 100);
 }
 
 void ToF_writeReg32Bit(struct ToF_struct *ToF, uint8_t reg, uint32_t value)
 {
-	uint8_t tmp[4];
-	tmp[0]=(uint8_t)value>>24 & 0xFF; //MSB
-	tmp[0]=(uint8_t)value>>16 & 0xFF;
-	tmp[0]=(uint8_t)value>>8  & 0xFF;
-	tmp[1]=(uint8_t)value     & 0xFF; //LSB
-	HAL_I2C_Mem_Write(&hi2c1, (ToF->bus_address)<<1, reg, 1, tmp, 4, HAL_MAX_DELAY);
+    uint8_t data[5];
+
+    data[0] = reg;
+	data[1]=(uint8_t)(value >> 24); //MSB
+	data[2]=(uint8_t)(value >> 16);
+	data[3]=(uint8_t)(value >> 8 );
+	data[4]=(uint8_t)(value      ); //LSB
+
+    HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, data, 5, 100);
 }
 
 void ToF_writeMulti(struct ToF_struct *ToF, uint8_t reg, uint8_t *src, uint8_t count)
 {
-	HAL_I2C_Mem_Write(&hi2c1, (ToF->bus_address)<<1, reg, 1, src, count, HAL_MAX_DELAY);
+	uint8_t data[count+1];
+
+	data[0] = reg;
+	data[1] = 211;
+	data[2] = 0;
+	data[3] = 0;
+	data[4] = 0;
+	data[5] = 0;
+	data[6] = 0;
+
+/*
+	data[0] = reg;
+	for(int i = 0; i < count; i++)
+	{
+		data[i+1] == src[count-i];
+	}
+*/
+
+    HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, data, count+1, 100);
 }
 
-//Czytanie z rejestrów
 
-//HAL_I2C_Mem_Read (I2C_HandleTypeDef *hi2c, uint16_t DevAddress   , uint16_t MemAddress, uint16_t MemAddSize, uint8_t *pData, uint16_t Size, uint32_t Timeout)
-//HAL_I2C_Mem_Read (&hi2c1                 ,  (ToF->bus_address)<<1, reg                , 1                  , &value        , sizeof(value), HAL_MAX_DELAY   )
-
-
+//czytanie z rejestrów
 uint8_t ToF_readReg(struct ToF_struct *ToF, uint8_t reg)
 {
 	uint8_t value = 0;
 
-	HAL_I2C_Mem_Read(&hi2c1, (ToF->bus_address)<<1, reg, 1, &value, 1, HAL_MAX_DELAY);
+    HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, &reg, 1, 100);
+    HAL_I2C_Master_Receive(&hi2c1, (ToF->bus_address)<<1,  &value, 1, 100);
 
-	return value;
+    return value;
 }
 
 uint16_t ToF_readReg16Bit(struct ToF_struct *ToF, uint8_t reg)
 {
 	uint8_t value_tab[2];
 
-	HAL_I2C_Mem_Read(&hi2c1, (ToF->bus_address)<<1, reg, 1, value_tab, 2, HAL_MAX_DELAY);
+    HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, &reg, 1, 100);
+    HAL_I2C_Master_Receive(&hi2c1, (ToF->bus_address)<<1,  value_tab, 2, 100);
 
-	uint16_t value = (value_tab[0] << 8) | value_tab[1];
+	uint16_t value = (uint16_t) value_tab[0] << 8;
+	value |= value_tab[1];
 
 	return value;
 }
 
 void ToF_readMulti(struct ToF_struct *ToF, uint8_t reg, uint8_t *dst, uint8_t count)
 {
-	HAL_I2C_Mem_Read(&hi2c1, (ToF->bus_address)<<1, reg, 1, dst, count, HAL_MAX_DELAY);
+	HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, reg, 1, 100);
+	HAL_I2C_Master_Receive(&hi2c1, (ToF->bus_address)<<1,  dst, count, 100);
+
+	dst[0] = 211;
+	dst[1] = 0;
+	dst[2] = 0;
+	dst[3] = 0;
+	dst[4] = 0;
+	dst[5] = 0;
 }
 
 uint8_t ToF_setSignalRateLimit(struct ToF_struct *ToF, float limit_Mcps)
@@ -76,7 +112,6 @@ uint8_t ToF_getSpadInfo(struct ToF_struct *ToF, uint8_t *count, uint8_t *type_is
 {
 	uint8_t tmp;
 
-	tmp = ToF_readReg(ToF, 0xC0);
 	ToF_writeReg(ToF, 0x80, 0x01);
 	ToF_writeReg(ToF, 0xFF, 0x01);
 	ToF_writeReg(ToF, 0x00, 0x00);
@@ -91,12 +126,12 @@ uint8_t ToF_getSpadInfo(struct ToF_struct *ToF, uint8_t *count, uint8_t *type_is
 	ToF_writeReg(ToF, 0x94, 0x6b);
 	ToF_writeReg(ToF, 0x83, 0x00);
 
-	/*
+
 	while (ToF_readReg(ToF, 0x83) == 0x00)
 	{
 
 	}
-	*/
+
 	ToF_writeReg(ToF, 0x83, 0x01);
 	tmp = ToF_readReg(ToF, 0x92);
 
@@ -367,6 +402,11 @@ uint8_t ToF_init(struct ToF_struct *ToF)
 {
 	ToF->bus_address = 0x29;
 
+
+    ToF_writeReg(ToF, VHV_CONFIG_PAD_SCL_SDA__EXTSUP_HV, ToF_readReg(ToF, VHV_CONFIG_PAD_SCL_SDA__EXTSUP_HV) | 0x01); // set bit 0
+
+	ToF_writeReg(ToF, 0x88, 0x00);
+
 	ToF_writeReg(ToF, 0x80, 0x01);
 	ToF_writeReg(ToF, 0xFF, 0x01);
 	ToF_writeReg(ToF, 0x00, 0x00);
@@ -592,7 +632,6 @@ uint16_t ToF_readRangeSingleMillimeters(struct ToF_struct *ToF)
  *
  */
 
-
 void initMicromouseVL53L0x()
 {
 	  //////////////////////////////////////////////////////////////////////////
@@ -607,7 +646,7 @@ void initMicromouseVL53L0x()
 
 	  //////////////////////////////////////////////////////////////////////////
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_F_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 0);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 1);
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 1);
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_R_Pin, 0);
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_L_Pin, 0);
@@ -617,8 +656,8 @@ void initMicromouseVL53L0x()
 
 	  //////////////////////////////////////////////////////////////////////////
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_F_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 0);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 1);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 1);
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_R_Pin, 1);
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_L_Pin, 0);
 
@@ -627,9 +666,9 @@ void initMicromouseVL53L0x()
 
 	  //////////////////////////////////////////////////////////////////////////
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_F_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_R_Pin, 0);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 1);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 1);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_R_Pin, 1);
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_L_Pin, 1);
 
 	  ToF_init(&ToF_L);                     //inicjalizacja czujnika L
@@ -637,10 +676,10 @@ void initMicromouseVL53L0x()
 
 	  //////////////////////////////////////////////////////////////////////////
 	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_F_Pin, 1);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_R_Pin, 0);
-	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_L_Pin, 0);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FR_Pin, 1);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_FL_Pin, 1);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_R_Pin, 1);
+	  HAL_GPIO_WritePin(GPIOC, TOF_GPIO_L_Pin, 1);
 
 	  ToF_init(&ToF_F);                     //inicjalizacja czujnika F
 	  ToF_setAddress(&ToF_F, 0x34);
@@ -658,3 +697,4 @@ void initMicromouseVL53L0x()
 	  ToF_startContinuous(&ToF_FR);
 	  ToF_startContinuous(&ToF_FL);
 }
+

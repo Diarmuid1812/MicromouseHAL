@@ -123,6 +123,13 @@ int main(void)
   //ramka danych na WDS
   char frameWDS[50] = {0};
 
+  //zmienne do testów VL53L0x
+  volatile int dist_F_tmp;
+  volatile int dist_L_tmp;
+  volatile int dist_R_tmp;
+  volatile int dist_FL_tmp;
+  volatile int dist_FR_tmp;
+
   /************************************************************************/
 
   HAL_GPIO_WritePin(GPIOB, RED_LED_Pin, 0);  //zapal LED
@@ -134,6 +141,7 @@ int main(void)
   initMicromouseVL53L0x();
 
   //inicjalizacja MPU6050
+
   MPU6050_Init(&hi2c1);
   MPU6050_SetInterruptMode(MPU6050_INTMODE_ACTIVEHIGH);
   MPU6050_SetInterruptDrive(MPU6050_INTDRV_PUSHPULL);
@@ -141,15 +149,6 @@ int main(void)
   MPU6050_SetInterruptLatchClear(MPU6050_INTCLEAR_STATUSREAD);
   MPU6050_SetIntEnableRegister(0);
 
-/*
- * to na razie nie działa - testowy odczyt z czujników ToF
- *
-  dist_F = ToF_readRangeContinuousMillimeters(&ToF_F);
-  dist_R = ToF_readRangeContinuousMillimeters(&ToF_R);
-  dist_L = ToF_readRangeContinuousMillimeters(&ToF_L);
-  dist_FL = ToF_readRangeContinuousMillimeters(&ToF_FL);
-  dist_FR = ToF_readRangeContinuousMillimeters(&ToF_FR);
-*/
   //inicjalizacja enkoderów
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
@@ -163,6 +162,7 @@ int main(void)
   while (1)
   {
 	  //odczyt danych z mpu6050
+
 	  MPU6050_GetAccelerometerScaled(&ax, &ay, &az);
 	  MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
 	  temperature = MPU6050_GetTemperatureCelsius();
@@ -179,14 +179,24 @@ int main(void)
 	  //test portu szeregowego
 	  printf("Hello world\n");
 
+
+
+	  //testowy odczyt z czujników ToF
+	  dist_F_tmp = ToF_readRangeContinuousMillimeters(&ToF_F);
+	  dist_R_tmp = ToF_readRangeContinuousMillimeters(&ToF_R);
+	  dist_L_tmp = ToF_readRangeContinuousMillimeters(&ToF_L);
+	  dist_FL_tmp = ToF_readRangeContinuousMillimeters(&ToF_FL);
+	  dist_FR_tmp = ToF_readRangeContinuousMillimeters(&ToF_FR);
+
+	  HAL_Delay(100);
+
 	  //generowanie ramki danych na WDS - na razie przykładowe dane
 	  //makeFrame(frameString,left_encoder,right_encoder,ToF_L,ToF_FL,ToF_F,ToF_FR,ToF_R);
-	  //tak powinna wyglądać gotowa ramka -> "X_00012_00034_0023_0234_0433_3444_0003_1886576405"
-	  makeFrame(frameWDS,12,34,23,234,433,3444,3);
+	  //tak powinna wyglądać przykładow gotowa ramka -> "X_00012_00034_0023_0234_0433_3444_0003_1886576405"
+	  makeFrame(frameWDS,lewy,prawy,dist_L_tmp,dist_FL_tmp,dist_F_tmp,dist_FR_tmp,dist_R_tmp);
 	  //wysłanie ramki
 	  printf("%s\n", frameWDS);
 
-	  HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 
