@@ -1,2 +1,0 @@
-encoders.c:14:6:encRead	4	static
-encoders.c:34:6:encReset	8	static,ignoring_inline_asm
