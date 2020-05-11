@@ -40,8 +40,8 @@ HAL_micromouse.bin \
 all: HAL_micromouse.elf secondary-outputs
 
 # Tool invocations
-HAL_micromouse.elf: $(OBJS) $(USER_OBJS) C:\Users\Wojtek\Documents\STM32_workspace\HAL_micromouse\STM32F411RETX_FLASH.ld
-	arm-none-eabi-gcc -o "HAL_micromouse.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Wojtek\Documents\STM32_workspace\HAL_micromouse\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HAL_micromouse.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+HAL_micromouse.elf: $(OBJS) $(USER_OBJS) C:\Users\Diarmuid\STM32CubeIDE\workspace_1.3.0\MicromouseHAL\HAL_micromouse\STM32F411RETX_FLASH.ld
+	arm-none-eabi-gcc -o "HAL_micromouse.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Diarmuid\STM32CubeIDE\workspace_1.3.0\MicromouseHAL\HAL_micromouse\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="HAL_micromouse.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

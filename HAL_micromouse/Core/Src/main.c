@@ -34,6 +34,7 @@
 #include "move.h"
 #include "encoders.h"
 #include "SoftwareCRC.h"
+#include "pid.h"
 
 /* USER CODE END Includes */
 
@@ -44,17 +45,24 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// Choose PID parameters */
+#define PID_PARAM_KP        100            /* Proportional */
+#define PID_PARAM_KI        0.025        /* Integral */
+#define PID_PARAM_KD        20            /* Derivative */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+//zmienne do testu PID
+volatile float eps = 0.0f;
+volatile float cv = 0.0f;
+volatile uint8_t pidChangedFlag = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,6 +80,15 @@ int _write ( int file, char *ptr, int len)
 {
  HAL_UART_Transmit(&huart2, (uint8_t*) ptr, len, 50);
  return len;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM10)
+	{
+		eps = leftTotal - rightTotal;
+		pidChangedFlag = 1;
+	}
 }
 /* USER CODE END 0 */
 
@@ -130,6 +147,7 @@ int main(void)
   volatile int dist_FL_tmp;
   volatile int dist_FR_tmp;
 
+
   /************************************************************************/
 
   HAL_GPIO_WritePin(GPIOB, RED_LED_Pin, 0);  //zapal LED
@@ -178,6 +196,15 @@ int main(void)
 
 	  //test portu szeregowego
 	  printf("Hello world\n");
+
+	  if(pidChangedFlag)
+	  {
+		  pidChangedFlag = 0;
+		  cv = pidCalc(eps);
+
+		  setMoveR( 1,  300.0f+cv/2);
+		  setMoveL( 1,  300.0f-cv/2);
+	  }
 
 
 

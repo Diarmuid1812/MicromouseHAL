@@ -33,7 +33,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/usart.h ../Core/Inc/gpio.h ../Core/Inc/VL53L0x.h \
  ../Core/Src/../../MPU6050/mpu6050.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy/../stm32f4xx_hal.h \
- ../Core/Inc/move.h ../Core/Inc/encoders.h ../Core/Inc/SoftwareCRC.h
+ ../Core/Inc/move.h ../Core/Inc/encoders.h ../Core/Inc/SoftwareCRC.h \
+ ../Core/Inc/pid.h
 
 ../Core/Inc/main.h:
 
@@ -118,3 +119,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/encoders.h:
 
 ../Core/Inc/SoftwareCRC.h:
+
+../Core/Inc/pid.h:

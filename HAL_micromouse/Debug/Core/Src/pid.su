@@ -1,0 +1,3 @@
+pid.c:27:6:pidInit	24	static
+pid.c:37:6:pidReset	4	static
+pid.c:44:7:pidCalc	16	static
