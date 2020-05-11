@@ -89,7 +89,7 @@ uint16_t ToF_readReg16Bit(struct ToF_struct *ToF, uint8_t reg)
 
 void ToF_readMulti(struct ToF_struct *ToF, uint8_t reg, uint8_t *dst, uint8_t count)
 {
-	HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, reg, 1, 100);
+	HAL_I2C_Master_Transmit(&hi2c1, (ToF->bus_address)<<1, &reg, 1, 100);
 	HAL_I2C_Master_Receive(&hi2c1, (ToF->bus_address)<<1,  dst, count, 100);
 
 	dst[0] = 211;
