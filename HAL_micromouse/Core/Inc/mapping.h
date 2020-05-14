@@ -2,7 +2,7 @@
  * mapping.h
  *
  *  Created on: 23 Gibl 2020
- *      Author: szust
+ *      Author: Mikołaj Szustakiewicz
  */
 
 #ifndef INC_MAPPING_H_
@@ -19,11 +19,42 @@
  * - lewy dolny rog
  */
 
-uint8_t map[16][16];
+//uint8_t map[16][16];
+
+typedef struct{
+	uint8_t visited;
+	uint8_t walls;
+	uint8_t distance;
+} field;
+
+
+field map[16][16];
+
 /* directions to access map
  * Usage: isWall = (map[X][Y]&(1u<<Dir))
  */
 typedef enum{N,E,S,W} DirType;
 
+typedef struct{
+	uint8_t pX;
+	uint8_t pY;
+}QNode;
+
+typedef struct{
+	uint8_t size;
+	uint8_t endInd;
+	QNode content[256];
+}FieldQue;
+
+uint8_t isQEmpty(FieldQue * Q);
+
+uint8_t isQFull(FieldQue * Q);
+
+void initQue(FieldQue * Q);
+
+void deque(FieldQue * Q, uint8_t* pX, uint8_t* pY);
+void enque(FieldQue * Q, uint8_t pX, uint8_t pY);
+
+void mapInit();
 
 #endif /* INC_MAPPING_H_ */

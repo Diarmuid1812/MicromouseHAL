@@ -35,6 +35,8 @@
 #include "encoders.h"
 #include "SoftwareCRC.h"
 #include "pid.h"
+#include "mapping.h"
+#include "FloodFill.h"
 
 /* USER CODE END Includes */
 
