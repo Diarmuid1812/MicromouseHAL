@@ -632,6 +632,43 @@ uint16_t ToF_readRangeSingleMillimeters(struct ToF_struct *ToF)
  *
  */
 
+
+/*
+ * filtr medianowy do odrzucania fałszywych pomiarów, gdzie czujnik zwraca nieprawidłowo wartość 8191
+ */
+int ToF_medianFilter(struct ToF_struct *ToF, int filter_length)
+{
+	int distArray[filter_length-1];
+	for (int i = 0; i < filter_length-1; i++)
+	{
+		distArray[i] = ToF_readRangeContinuousMillimeters(ToF);
+	}
+	//sortowanie bąbelkowe tablicy
+	{
+	   int i, j;
+	   for (i = 0; i < filter_length-1-1; i++)
+	       for (j = 0; j < filter_length-1-i-1; j++)
+	       {
+	    	   if(distArray[j] > distArray[j+1])
+	    	   {
+	    		   int tmp = distArray[j];
+	    		   distArray[j] = distArray[j+1];
+	    		   distArray[j+1] = tmp;
+	    	   }
+	       }
+	}
+
+	//wybranie mediany z posortowanej tablicy
+	if(filter_length % 2 == 1)
+	{
+		return distArray[filter_length/2];
+	}
+	else
+	{
+		return (distArray[(filter_length/2)-1]+distArray[filter_length/2])/2;
+	}
+}
+
 void initMicromouseVL53L0x()
 {
 	  //////////////////////////////////////////////////////////////////////////

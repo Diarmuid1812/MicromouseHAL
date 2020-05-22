@@ -208,14 +208,19 @@ int main(void)
 		  setMoveL( 1,  300.0f-cv/2);
 	  }
 
-
-
 	  //testowy odczyt z czujników ToF
 	  dist_F_tmp = ToF_readRangeContinuousMillimeters(&ToF_F);
 	  dist_R_tmp = ToF_readRangeContinuousMillimeters(&ToF_R);
 	  dist_L_tmp = ToF_readRangeContinuousMillimeters(&ToF_L);
 	  dist_FL_tmp = ToF_readRangeContinuousMillimeters(&ToF_FL);
 	  dist_FR_tmp = ToF_readRangeContinuousMillimeters(&ToF_FR);
+
+	  //odczyt z czujników ToF z filtrem medianowym
+	  dist_F_tmp = ToF_medianFilter(&ToF_F, 7);
+	  dist_R_tmp = ToF_medianFilter(&ToF_R, 7);
+	  dist_L_tmp = ToF_medianFilter(&ToF_L, 7);
+	  dist_FL_tmp = ToF_medianFilter(&ToF_FL, 7);
+	  dist_FR_tmp = ToF_medianFilter(&ToF_FR, 7);
 
 	  HAL_Delay(100);
 

@@ -193,6 +193,8 @@ volatile int dist_R;
 volatile int dist_FL;
 volatile int dist_FR;
 
+int ToF_medianFilter(struct ToF_struct *ToF, int filter_length);
+
 void initMicromouseVL53L0x();
 
 #endif /* INC_VL53L0X_H_ */
