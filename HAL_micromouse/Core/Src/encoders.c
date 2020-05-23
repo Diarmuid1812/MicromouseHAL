@@ -34,12 +34,16 @@ void encRead(void)
 void encReset (void)
 {
   __disable_irq();
+  leftEncoder = 0;
+  rightEncoder = 0;
   oldLeftEncoder = 0;
   oldRightEncoder = 0;
+
   leftTotal = 0;
   rightTotal = 0;
   fwdTotal = 0;
   rotTotal = 0;
+
   __HAL_TIM_SET_COUNTER(&htim2, 0);
   __HAL_TIM_SET_COUNTER(&htim4, 0);
   encRead();

@@ -18,11 +18,11 @@
 static float pidKp = 0;
 static float pidKi = 0;
 static float pidKd = 0;
-static float ep = 0;
+static float ep = 0;      //uchyb poprzedni
 
-static float C = 0;
-static float U = 0;
-const float dt = 0.5;
+static float C = 0;       //całka
+static float U = 0;       //wyjście regulatora
+const float dt = 0.001;   //podstawa czasu
 
 void pidInit(float kp_param, float ki_param, float kd_param)
 {
