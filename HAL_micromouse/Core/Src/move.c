@@ -5,11 +5,7 @@
  *      Author: Mikolaj Szustakiewicz
  */
 
-
-#include "main.h"
 #include "move.h"
-#include "encoders.h"
-#include "tim.h"
 
 void motorsInit()
 {
@@ -57,40 +53,69 @@ void setMoveL(int8_t movementDir, uint32_t Comp)
 	}
 }
 
-void move_fwd()
-{//TODO dodac PID
-	int16_t fwdTmp = fwdTotal;
-	/* ??? todo: Do czego to było ???*/
-	while(fwdTotal < fwdTmp+2000) { //Wartosc obr do zwrotu o 90 deg
-		setMoveR(1,300);
-		setMoveL(1,300);
+/*
+ * Funkcja wykonuje ruch naprzód o zadaną w milimetrach odległość. Zwraca 1, gdy zakończyła jazdę i 0, gdy nadal jedzie
+ * średnica koła - 37.2mm
+ * ilość tików na obrót - 900
+ * ilość tików na milimetr - 7.70105
+ *
+ */
 
-		encRead();
+uint8_t move_forward(uint32_t distance_mm, uint32_t speed)
+{
+	int cv = 0;
+	encRead();
+	if (((rightTotal + leftTotal) / 2) < 7.70105 * distance_mm)
+	{
+		if (pidChangedFlag)
+		{
+			pidChangedFlag = 0;
+			cv = pidCalc(eps);
 
-		HAL_Delay(10);
+			setMoveR(1, speed - cv/2);
+			setMoveL(1, speed + cv/2);
 		}
-
-		setMoveR(1,0);
-		setMoveL(1,0);
-
+		return 0;
+	}
+	else
+	{
+		setMoveR(1, 0);
+		setMoveL(1, 0);
+		encReset();
+		return 1;
+	}
 }
 
-void move_back()
-{//TODO dodac PID
-	int16_t fwdTmp = fwdTotal;
-	/* ??? todo: Do czego to było ???*/
-	while(fwdTotal < fwdTmp+2000) { //Wartosc obr do zwrotu o 90 deg
-		setMoveR(-1,300);
-		setMoveL(-1,300);
+/*
+ * Funkcja wykonuje ruch do tyłu o zadaną w milimetrach odległość. Zwraca 1, gdy zakończyła jazdę i 0, gdy nadal jedzie
+ * średnica koła - 37.2mm
+ * ilość tików na obrót - 900
+ * ilość tików na milimetr - 7.70105
+ *
+ */
+uint8_t move_back(uint32_t distance_mm, uint32_t speed)
+{
+	int cv = 0;
+	encRead();
+	if (((rightTotal + leftTotal) / 2) > -7.70105 * distance_mm)
+	{
+		if (pidChangedFlag)
+		{
+			pidChangedFlag = 0;
+			cv = pidCalc(eps);
 
-		encRead();
-
-		HAL_Delay(10);
+			setMoveR(-1, speed + cv/2);
+			setMoveL(-1, speed - cv/2);
 		}
-
-		setMoveR(1,0);
-		setMoveL(1,0);
-
+		return 0;
+	}
+	else
+	{
+		setMoveR(-1, 0);
+		setMoveL(-1, 0);
+		encReset();
+		return 1;
+	}
 }
 
 void turn_right()
