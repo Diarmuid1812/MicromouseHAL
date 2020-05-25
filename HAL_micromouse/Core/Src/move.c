@@ -61,7 +61,7 @@ void setMoveL(int8_t movementDir, uint32_t Comp)
  *
  */
 
-uint8_t move_forward(uint32_t distance_mm, uint32_t speed)
+uint8_t move_forward(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
 {
 	int cv = 0;
 	encRead();
@@ -70,7 +70,7 @@ uint8_t move_forward(uint32_t distance_mm, uint32_t speed)
 		if (pidChangedFlag)
 		{
 			pidChangedFlag = 0;
-			cv = pidCalc(eps);
+			cv = pidCalc(pid, eps);
 
 			setMoveR(1, speed - cv/2);
 			setMoveL(1, speed + cv/2);
@@ -93,7 +93,7 @@ uint8_t move_forward(uint32_t distance_mm, uint32_t speed)
  * ilość tików na milimetr - 7.70105
  *
  */
-uint8_t move_back(uint32_t distance_mm, uint32_t speed)
+uint8_t move_back(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
 {
 	int cv = 0;
 	encRead();
@@ -102,7 +102,7 @@ uint8_t move_back(uint32_t distance_mm, uint32_t speed)
 		if (pidChangedFlag)
 		{
 			pidChangedFlag = 0;
-			cv = pidCalc(eps);
+			cv = pidCalc(pid,eps);
 
 			setMoveR(-1, speed + cv/2);
 			setMoveL(-1, speed - cv/2);

@@ -7,20 +7,27 @@
 
 #ifndef INC_PID_H_
 #define INC_PID_H_
+typedef struct
+{
+	//nastawy regulatora
+	float pidKp;
+	float pidKi;
+	float pidKd;
 
-float pidKp;
-float pidKi;
-float pidKd;
-float ep;      //uchyb poprzedni
+	//uchyb poprzedni
+	float ep;
 
-float C;    //całka
-float U;    //wyjście regulatora
-float dt;   //podstawa czasu
+	//całka
+	float C;
+	//wyjście regulatora
+	float U;
+	//podstawa czasu
+	float dt;
+}PIDtype_f;
 
-void pidInit(float kp_param, float ki_param, float kd_param);
+void pidInit(PIDtype_f * pid, float kp_param, float ki_param, float kd_param, float dt_param);
 
-void pidReset();
-
-float pidCalc(float eps);
+void pidReset(PIDtype_f * pid);
+float pidCalc(PIDtype_f * pid, float eps);
 
 #endif /* INC_PID_H_ */

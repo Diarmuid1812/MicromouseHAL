@@ -49,10 +49,6 @@
 //wyższa matematyka
 #define PI 3.14159265359
 
-//parametry regulatora PID
-#define PID_PARAM_KP        5         /* Proportional */
-#define PID_PARAM_KI        8         /* Integral */
-#define PID_PARAM_KD        0.001     /* Derivative */
 
 //interwały zdarzań w pętli main w ms
 #define DIST_READ_INTERVAL 100
@@ -80,6 +76,7 @@
 //zmienne dla regulatora PID
 volatile float eps = 0.0f;
 volatile uint8_t pidChangedFlag = 0;
+
 
 /* USER CODE END PV */
 
@@ -199,10 +196,8 @@ int main(void)
 	//inicjalizacja enkoderów
 	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-
 	//inicjalizacja PID
-	pidInit(PID_PARAM_KP, PID_PARAM_KI, PID_PARAM_KD);
-
+	pidInit(&pidSt,PID_PARAM_KP, PID_PARAM_KI, PID_PARAM_KD, PID_DT);
 	HAL_Delay(3000);
 
 	/* USER CODE END 2 */
@@ -230,7 +225,7 @@ int main(void)
 		static int x = 0;
 		if (x == 0)
 		{
-			x = move_back(200, 100);
+			x = move_back(200, 100, &pidSt);
 			if (x == 1)
 			{
 				HAL_Delay(1000);
