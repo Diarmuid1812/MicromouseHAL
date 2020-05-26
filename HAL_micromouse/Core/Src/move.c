@@ -61,7 +61,7 @@ void setMoveL(int8_t movementDir, uint32_t Comp)
  *
  */
 
-uint8_t move_forward(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
+uint8_t move_forward(uint32_t distance_mm, uint32_t speed)
 {
 	int cv = 0;
 	encRead();
@@ -70,7 +70,7 @@ uint8_t move_forward(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
 		if (pidChangedFlag)
 		{
 			pidChangedFlag = 0;
-			cv = pidCalc(pid, eps);
+			cv = pidCalc(&pidSt, eps);
 
 			setMoveR(1, speed - cv/2);
 			setMoveL(1, speed + cv/2);
@@ -93,7 +93,7 @@ uint8_t move_forward(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
  * ilość tików na milimetr - 7.70105
  *
  */
-uint8_t move_back(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
+uint8_t move_back(uint32_t distance_mm, uint32_t speed)
 {
 	int cv = 0;
 	encRead();
@@ -102,7 +102,7 @@ uint8_t move_back(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
 		if (pidChangedFlag)
 		{
 			pidChangedFlag = 0;
-			cv = pidCalc(pid,eps);
+			cv = pidCalc(&pidSt,eps);
 
 			setMoveR(-1, speed + cv/2);
 			setMoveL(-1, speed - cv/2);
@@ -118,40 +118,83 @@ uint8_t move_back(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid)
 	}
 }
 
-void turn_right()
+
+//skret w prawo - wartość ujemna, skręt w lewo - wartość dodatnia. Jak kąty na układnie współrzędnych.
+
+uint8_t turn_right(float currentAngle, float destAngle, uint32_t speed)
 {
-	encRead();
+	if (currentAngle > destAngle + 1000)
+	{
+		setMoveR(-1, speed);    //100 optymalna wartość dla prędkości obrotu
+		setMoveL(1, speed);
 
-	int16_t rotTmp = rotTotal;
-
-	while(rotTotal > rotTmp-911) { //Wartosc obr do zwrotu o 90 deg
-	setMoveR(-1,200);
-	setMoveL(1,200);
-
-	//encodersRead();
-
-	HAL_Delay(10);
+		return 0;
 	}
 
-	setMoveR(1,0);
-	setMoveL(1,0);
+	else
+	{
+		setMoveR(-1, 0);
+		setMoveL(-1, 0);
+		encReset();
+		return 1;
+	}
 }
 
-void turn_left()
+uint8_t turn_left(float currentAngle, float destAngle, uint32_t speed)
 {
-	encRead();
+	if (currentAngle < destAngle - 1000)
+	{
+		setMoveR(1, speed);    //100 optymalna wartość dla prędkości obrotu
+		setMoveL(-1, speed);
 
-	int16_t rotTmp = rotTotal;
-
-	while(rotTotal < rotTmp+980) { //Wartosc obr do zwrotu o 90 deg
-	setMoveR(1,200);
-	setMoveL(-1,200);
-
-	encRead();
-
-	HAL_Delay(10);
+		return 0;
 	}
 
-	setMoveR(1,0);
-	setMoveL(1,0);
+	else
+	{
+		setMoveR(-1, 0);
+		setMoveL(-1, 0);
+		encReset();
+		return 1;
+	}
+}
+
+uint8_t turn_pid(float currentAngle, float destAngle)
+{
+
+	if (currentAngle > destAngle + 100 || currentAngle < destAngle - 100) //skręt w prawo
+	{
+		if (pidChangedFlag)
+		{
+			pidChangedFlag = 0;
+
+			int32_t cv = pidCalc(&pidAngle, destAngle - currentAngle);
+
+			if (cv > 400) //400 - maksymalna prędkość obrotu silników przy obrocie
+				cv = 400;
+			if (cv < -400)
+				cv = -400;
+
+			if (cv < 0)
+			{
+				setMoveR(-1, 100 - cv / 2); //100 to próg zadziałania silników
+				setMoveL(1, 100 - cv / 2);
+			}
+			else if (cv > 0)
+			{
+				setMoveR(1, 100 + cv / 2);
+				setMoveL(-1, 100 + cv / 2);
+			}
+		}
+
+		return 0;
+	}
+
+	else
+	{
+		setMoveR(-1, 0);
+		setMoveL(-1, 0);
+		encReset();
+		return 1;
+	}
 }

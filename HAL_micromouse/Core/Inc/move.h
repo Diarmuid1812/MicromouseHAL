@@ -15,14 +15,23 @@
 
 //Inicjalizacja PID
 
-//parametry regulatora PID
-#define PID_PARAM_KP        5         /* Proportional */
-#define PID_PARAM_KI        8         /* Integral */
-#define PID_PARAM_KD        0.001     /* Derivative */
+//parametry regulatora PID do jazdy na wprost
+#define PID_ST_PARAM_KP        5         /* Proportional */
+#define PID_ST_PARAM_KI        40        /* Integral */
+#define PID_ST_PARAM_KD        0.005     /* Derivative */
+
+//parametry regulatora PID do skrętów
+#define PID_ANGLE_PARAM_KP     0.010         /* Proportional */
+#define PID_ANGLE_PARAM_KI     0.008         /* Integral */
+#define PID_ANGLE_PARAM_KD     0.000       /* Derivative */
+
 #define PID_DT              0.001     /*Time loop duration*/
+
 //PID dla poruszania na wprost
 PIDtype_f pidSt;
-/************************************/
+
+//PID do obrotu w osi yaw
+PIDtype_f pidAngle;
 
 /***********************************/
 
@@ -39,13 +48,14 @@ void setMoveR(int8_t movementDir, uint32_t Comp);
 
 void setMoveL(int8_t movementDir, uint32_t Comp);
 
-uint8_t move_forward(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid);
+uint8_t move_forward(uint32_t distance_mm, uint32_t speed);
 
-uint8_t move_back(uint32_t distance_mm, uint32_t speed, PIDtype_f * pid);
+uint8_t move_back(uint32_t distance_mm, uint32_t speed);
 
-void turn_right();
-void turn_left();
+uint8_t turn_right(float currentAngle, float destAngle, uint32_t speed);
 
+uint8_t turn_left(float currentAngle, float destAngle, uint32_t speed);
 
+uint8_t turn_pid(float currentAngle, float destAngle);
 
 #endif /* INC_MOVE_H_ */

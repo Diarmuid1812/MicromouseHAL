@@ -29,7 +29,7 @@ void pidReset(PIDtype_f * pid)
 float pidCalc(PIDtype_f * pid, float eps)
 {
 	pid->C+=((pid->ep + eps)/2)*pid->dt;
-	pid->U=pid->pidKp*(pid->ep + pid->pidKi*pid->C + pid->pidKd*(pid->ep-eps)/pid->dt);
+	pid->U=(pid->pidKp*pid->ep)  +  (pid->pidKi*pid->C)  +  (pid->pidKd*(pid->ep-eps)/pid->dt);
 	pid->ep = eps;
 
 	return pid->U;

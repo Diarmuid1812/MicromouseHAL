@@ -77,6 +77,12 @@
 volatile float eps = 0.0f;
 volatile uint8_t pidChangedFlag = 0;
 
+//rotacja robota
+float rotx = 0;
+
+//zmienne dla MPU6050
+float ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0, temperature = 0;
+
 
 /* USER CODE END PV */
 
@@ -150,16 +156,12 @@ int main(void)
 	//zmienne lokalne funkcji main - ustawione jako lokalne by były od razu widoczne w debuggerze
 	/************************************************************************/
 
-	//zmienne dla MPU6050
-	float ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0, temperature = 0;
-
 	//zmienne do podglądu enkoderów
 	uint32_t prawy = 0;
 	uint32_t lewy = 0;
 
 	//ramka danych na WDS
-	char frameWDS[50] =
-	{ 0 };
+	char frameWDS[50] =	{0};
 
 	//zmienne do testów VL53L0x
 	volatile int dist_F_tmp;
@@ -171,6 +173,7 @@ int main(void)
 	//zmienne do odmierzania interwałów czasowych za pomocą systick
 	uint32_t time_ToF = 0;
 	uint32_t time_blink = 0;
+	uint32_t time_gyro = 0;
 
 	/************************************************************************/
 
@@ -189,6 +192,7 @@ int main(void)
 	MPU6050_SetInterruptLatchClear(MPU6050_INTCLEAR_STATUSREAD);
 	MPU6050_SetIntEnableRegister(0);
 	MPU6050_SetDlpf(MPU6050_DHPF_5);
+	MPU6050_SetFullScaleGyroRange(MPU6050_GYRO_FS_1000);
 
 	//inicjalizacja PWM dla silników
 	motorsInit();
@@ -196,8 +200,12 @@ int main(void)
 	//inicjalizacja enkoderów
 	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-	//inicjalizacja PID
-	pidInit(&pidSt,PID_PARAM_KP, PID_PARAM_KI, PID_PARAM_KD, PID_DT);
+
+	//inicjalizacja PID do jazdy na wprost
+	pidInit(&pidSt,PID_ST_PARAM_KP, PID_ST_PARAM_KI, PID_ST_PARAM_KD, PID_DT);
+	//inicjalizacja PID do skrętów
+	pidInit(&pidAngle,PID_ANGLE_PARAM_KP, PID_ANGLE_PARAM_KI, PID_ANGLE_PARAM_KD, PID_DT);
+
 	HAL_Delay(3000);
 
 	/* USER CODE END 2 */
@@ -209,7 +217,7 @@ int main(void)
 	{
 		uint32_t czas1 = HAL_GetTick();
 		//odczyt danych z mpu6050
-		MPU6050_GetAccelerometerScaled(&ax, &ay, &az);
+		//MPU6050_GetAccelerometerScaled(&ax, &ay, &az);
 		MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
 		temperature = MPU6050_GetTemperatureCelsius();
 
@@ -222,21 +230,43 @@ int main(void)
 		printf("Hello world\n");
 
 		////////////////////////////////////////////////////
-		static int x = 0;
+		//tutaj test jazdy i obrotu
+		static int x = 1;
+		static int x1 = 1;
 		if (x == 0)
 		{
-			x = move_back(200, 100, &pidSt);
-			if (x == 1)
+			x = turn_right(rotx, -90000, 100);
+			if (x == 1)                           // jeśli funkcja zakończyła się - robot doszedł do rotacji docelowej
 			{
+				rotx = 0;                         // wyzeruj rotację globalną
+				gx = 0;                           // wyzeruj odczyt żyroskopu
 				HAL_Delay(1000);
+				x1 = 0;                           // ustaw flagę skrętu w drugą stronę
+			}
+
+		}
+		if (x1 == 0)
+		{
+			x = turn_left(rotx, 90000, 100);
+			if (x1 == 1)
+			{
+				rotx = 0;
+				gx = 0;
+				HAL_Delay(1000);
+				x1 = 0;
 			}
 		}
 
+
 		if(BUTTON_STATE() == 1)
 		{
-			HAL_Delay(300);
+			HAL_Delay(500);
 			x = 0;
+			rotx = 0;
+			gx = 0;
 		}
+
+		// koniec testu jazdy
 		////////////////////////////////////////////////////
 
 		//testowy odczyt z czujników ToF
@@ -250,30 +280,30 @@ int main(void)
 			time_ToF = HAL_GetTick();
 		}
 
+		//miganie diodą - nieblokujące
 		if ((HAL_GetTick() - time_blink) >= BLINK_INTERVAL)
 		{
 			LED_TOGGLE();
 			time_blink = HAL_GetTick();
 		}
 
-		//odczyt z czujników ToF z filtrem medianowym
-		/*
-		 dist_F_tmp = ToF_medianFilter(&ToF_F, 7);
-		 dist_R_tmp = ToF_medianFilter(&ToF_R, 7);
-		 dist_L_tmp = ToF_medianFilter(&ToF_L, 7);
-		 dist_FL_tmp = ToF_medianFilter(&ToF_FL, 7);
-		 dist_FR_tmp = ToF_medianFilter(&ToF_FR, 7);
-		 */
+		//inkrementacja obrotu w zmierzonym oknie czasowym
+		if(gx > 3 || gx < -3)
+		{
+			rotx += gx*(HAL_GetTick() - time_gyro);
+		}
+		time_gyro = HAL_GetTick();
 
 		//generowanie ramki danych na WDS
 		//makeFrame(frameString,left_encoder,right_encoder,ToF_L,ToF_FL,ToF_F,ToF_FR,ToF_R);
 		//tak powinna wyglądać przykładowa gotowa ramka -> "X_00012_00034_0023_0234_0433_3444_0003_1886576405"
-		makeFrame(frameWDS, lewy, prawy, dist_L_tmp, dist_FL_tmp, dist_F_tmp,
-				dist_FR_tmp, dist_R_tmp);
+		makeFrame(frameWDS, lewy, prawy, dist_L_tmp, dist_FL_tmp, dist_F_tmp, dist_FR_tmp, dist_R_tmp);
 		//wysłanie ramki
 		printf("%s\n", frameWDS);
 
+		//pomiar czasu trwania całej pętli
 		uint32_t czas2 = HAL_GetTick() - czas1;
+
 		HAL_Delay(0);
 
 		/* USER CODE END WHILE */
