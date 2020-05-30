@@ -19,13 +19,20 @@
 #define PID_ST_PARAM_KP        5         /* Proportional */
 #define PID_ST_PARAM_KI        40        /* Integral */
 #define PID_ST_PARAM_KD        0.005     /* Derivative */
+#define PID_ST_WINDUP          10000     /* Windup integratora */
 
 //parametry regulatora PID do skrętów
-#define PID_ANGLE_PARAM_KP     0.010         /* Proportional */
-#define PID_ANGLE_PARAM_KI     0.008         /* Integral */
-#define PID_ANGLE_PARAM_KD     0.000       /* Derivative */
+#define PID_ANGLE_PARAM_KP     0.020         /* Proportional */
+#define PID_ANGLE_PARAM_KI     1.200         /* Integral */
+#define PID_ANGLE_PARAM_KD     0.000         /* Derivative */
+#define PID_ANGLE_WINDUP       70         /* Windup integratora */
 
 #define PID_DT              0.001     /*Time loop duration*/
+
+#define MOTR_SetCompare(Compare)	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,Compare)
+#define MOTL_SetCompare(Compare)	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,Compare)
+
+/***********************************/
 
 //PID dla poruszania na wprost
 PIDtype_f pidSt;
@@ -33,11 +40,13 @@ PIDtype_f pidSt;
 //PID do obrotu w osi yaw
 PIDtype_f pidAngle;
 
+//licznik zapobiegający wykryciu zerowego uchybu podczas przechodzenia przez zero - wykorzystany w funkcji turn_pid()
+uint8_t counter;
+
 /***********************************/
 
 
-#define MOTR_SetCompare(Compare)	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_3,Compare)
-#define MOTL_SetCompare(Compare)	__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_1,Compare)
+
 
 extern volatile uint8_t pidChangedFlag;
 extern volatile float eps;

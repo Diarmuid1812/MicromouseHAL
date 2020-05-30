@@ -161,9 +161,9 @@ uint8_t turn_left(float currentAngle, float destAngle, uint32_t speed)
 
 uint8_t turn_pid(float currentAngle, float destAngle)
 {
-
 	if (currentAngle > destAngle + 100 || currentAngle < destAngle - 100) //skręt w prawo
 	{
+		counter = 0;
 		if (pidChangedFlag)
 		{
 			pidChangedFlag = 0;
@@ -177,13 +177,13 @@ uint8_t turn_pid(float currentAngle, float destAngle)
 
 			if (cv < 0)
 			{
-				setMoveR(-1, 100 - cv / 2); //100 to próg zadziałania silników
-				setMoveL(1, 100 - cv / 2);
+				setMoveR(-1, 35 - cv / 2);
+				setMoveL(1, 35 - cv / 2);
 			}
 			else if (cv > 0)
 			{
-				setMoveR(1, 100 + cv / 2);
-				setMoveL(-1, 100 + cv / 2);
+				setMoveR(1, 35 + cv / 2);
+				setMoveL(-1, 35 + cv / 2);
 			}
 		}
 
@@ -192,9 +192,14 @@ uint8_t turn_pid(float currentAngle, float destAngle)
 
 	else
 	{
-		setMoveR(-1, 0);
-		setMoveL(-1, 0);
-		encReset();
-		return 1;
+		counter++;
+		if(counter == 2)
+		{
+			setMoveR(-1, 0);
+			setMoveL(-1, 0);
+			encReset();
+			return 1;
+		}
+		return 0;
 	}
 }

@@ -202,11 +202,11 @@ int main(void)
 	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 
 	//inicjalizacja PID do jazdy na wprost
-	pidInit(&pidSt,PID_ST_PARAM_KP, PID_ST_PARAM_KI, PID_ST_PARAM_KD, PID_DT);
+	pidInit(&pidSt,PID_ST_PARAM_KP, PID_ST_PARAM_KI, PID_ST_PARAM_KD, PID_DT, PID_ST_WINDUP);
 	//inicjalizacja PID do skrętów
-	pidInit(&pidAngle,PID_ANGLE_PARAM_KP, PID_ANGLE_PARAM_KI, PID_ANGLE_PARAM_KD, PID_DT);
+	pidInit(&pidAngle,PID_ANGLE_PARAM_KP, PID_ANGLE_PARAM_KI, PID_ANGLE_PARAM_KD, PID_DT, PID_ANGLE_WINDUP);
 
-	HAL_Delay(3000);
+	HAL_Delay(1000);
 
 	/* USER CODE END 2 */
 
@@ -235,27 +235,28 @@ int main(void)
 		static int x1 = 1;
 		if (x == 0)
 		{
-			x = turn_right(rotx, -90000, 100);
+			x = turn_pid(rotx, -90000);
 			if (x == 1)                           // jeśli funkcja zakończyła się - robot doszedł do rotacji docelowej
 			{
+
 				rotx = 0;                         // wyzeruj rotację globalną
 				gx = 0;                           // wyzeruj odczyt żyroskopu
-				HAL_Delay(1000);
+				HAL_Delay(700);
 				x1 = 0;                           // ustaw flagę skrętu w drugą stronę
 			}
 
 		}
-		if (x1 == 0)
-		{
-			x = turn_left(rotx, 90000, 100);
-			if (x1 == 1)
-			{
-				rotx = 0;
-				gx = 0;
-				HAL_Delay(1000);
-				x1 = 0;
-			}
-		}
+//		if (x1 == 0)
+//		{
+//			x = turn_pid(rotx, 90000);
+//			if (x1 == 1)
+//			{
+//				rotx = 0;
+//				gx = 0;
+//				HAL_Delay(1000);
+//				x1 = 0;
+//			}
+//		}
 
 
 		if(BUTTON_STATE() == 1)
@@ -288,7 +289,7 @@ int main(void)
 		}
 
 		//inkrementacja obrotu w zmierzonym oknie czasowym
-		if(gx > 3 || gx < -3)
+		if(gx > 2 || gx < -2)
 		{
 			rotx += gx*(HAL_GetTick() - time_gyro);
 		}
