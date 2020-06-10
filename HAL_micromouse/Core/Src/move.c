@@ -198,6 +198,8 @@ uint8_t turn_pid(float currentAngle, float destAngle)
 			setMoveR(-1, 0);
 			setMoveL(-1, 0);
 			encReset();
+			gx = 0;
+			rotx = 0;
 			return 1;
 		}
 		return 0;

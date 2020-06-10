@@ -51,6 +51,9 @@ uint8_t counter;
 extern volatile uint8_t pidChangedFlag;
 extern volatile float eps;
 
+extern float rotx;
+extern float gx;
+
 void motorsInit();
 
 void setMoveR(int8_t movementDir, uint32_t Comp);

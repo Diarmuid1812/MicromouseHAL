@@ -232,31 +232,42 @@ int main(void)
 		////////////////////////////////////////////////////
 		//tutaj test jazdy i obrotu
 		static int x = 1;
-		static int x1 = 1;
+		static int x1 = 0;
+
 		if (x == 0)
 		{
-			x = turn_pid(rotx, -90000);
-			if (x == 1)                           // jeśli funkcja zakończyła się - robot doszedł do rotacji docelowej
+			switch (x1)
 			{
-
-				rotx = 0;                         // wyzeruj rotację globalną
-				gx = 0;                           // wyzeruj odczyt żyroskopu
-				HAL_Delay(700);
-				x1 = 0;                           // ustaw flagę skrętu w drugą stronę
+			case 0:
+			{
+				x1 += turn_pid(rotx, -90000);
 			}
+				break;
 
+			case 1:
+			{
+				x1 += move_forward(300, 200);
+			}
+				break;
+
+			case 2:
+			{
+				x1 += turn_pid(rotx, 90000);
+			}
+				break;
+			case 3:
+			{
+				x1 += move_forward(300, 200);
+			}
+				break;
+
+			case 4:
+			{
+				x1 = 0;
+			}
+				break;
+			}
 		}
-//		if (x1 == 0)
-//		{
-//			x = turn_pid(rotx, 90000);
-//			if (x1 == 1)
-//			{
-//				rotx = 0;
-//				gx = 0;
-//				HAL_Delay(1000);
-//				x1 = 0;
-//			}
-//		}
 
 
 		if(BUTTON_STATE() == 1)
