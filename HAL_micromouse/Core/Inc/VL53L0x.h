@@ -197,4 +197,6 @@ int ToF_medianFilter(struct ToF_struct *ToF, int filter_length);
 
 void initMicromouseVL53L0x();
 
+uint8_t isWall(struct ToF_struct *ToF);
+
 #endif /* INC_VL53L0X_H_ */

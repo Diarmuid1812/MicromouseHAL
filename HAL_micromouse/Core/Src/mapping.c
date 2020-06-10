@@ -49,9 +49,9 @@ void enque(FieldQue * Q, uint8_t pX, uint8_t pY)
 
 void mapInit()
 {
-	for(uint8_t px=0; px<16; ++px)
+	for(uint8_t px=0; px<LABIRYNTH_SIZE; ++px)
 	{
-		for(uint8_t py=0; py<16; ++py)
+		for(uint8_t py=0; py<LABIRYNTH_SIZE; ++py)
 		{
 			map[px][py].distance=255;
 			map[px][py].visited=0;

@@ -156,6 +156,10 @@ int main(void)
 	//zmienne lokalne funkcji main - ustawione jako lokalne by były od razu widoczne w debuggerze
 	/************************************************************************/
 
+	uint8_t wall_f = 0;
+	uint8_t wall_r = 0;
+	uint8_t wall_l = 0;
+
 	//zmienne do podglądu enkoderów
 	uint32_t prawy = 0;
 	uint32_t lewy = 0;
@@ -277,6 +281,10 @@ int main(void)
 			rotx = 0;
 			gx = 0;
 		}
+
+		wall_f = isWall(&ToF_F);
+		wall_r = isWall(&ToF_R);
+		wall_l = isWall(&ToF_L);
 
 		// koniec testu jazdy
 		////////////////////////////////////////////////////

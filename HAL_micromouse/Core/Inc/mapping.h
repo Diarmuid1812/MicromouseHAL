@@ -10,6 +10,8 @@
 
 #include "stm32f4xx_hal.h"
 
+#define LABIRYNTH_SIZE 4
+
 
 /**mapa -- reprezentacja:
  * 0000 W_wall_bit S_wall_bit E_wall_bit N_wall_bit
@@ -19,7 +21,7 @@
  * - lewy dolny rog
  */
 
-//uint8_t map[16][16];
+//uint8_t map[LABIRYNTH_SIZE][LABIRYNTH_SIZE];
 
 typedef struct{
 	uint8_t visited;
@@ -28,7 +30,7 @@ typedef struct{
 } field;
 
 
-field map[16][16];
+field map[LABIRYNTH_SIZE][LABIRYNTH_SIZE];
 
 /* directions to access map
  * Usage: isWall = (map[X][Y]&(1u<<Dir))
@@ -43,7 +45,7 @@ typedef struct{
 typedef struct{
 	uint8_t size;
 	uint8_t endInd;
-	QNode content[256];
+	QNode content[LABIRYNTH_SIZE*LABIRYNTH_SIZE];
 }FieldQue;
 
 uint8_t isQEmpty(FieldQue * Q);
