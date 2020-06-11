@@ -8,6 +8,6 @@
 #ifndef INC_FLOODFILL_H_
 #define INC_FLOODFILL_H_
 
-void floodFill(uint8_t posX, uint8_t posY);
+DirType floodFill(uint8_t posX, uint8_t posY, DirType dir);
 
 #endif /* INC_FLOODFILL_H_ */

@@ -156,9 +156,14 @@ int main(void)
 	//zmienne lokalne funkcji main - ustawione jako lokalne by były od razu widoczne w debuggerze
 	/************************************************************************/
 
-	uint8_t wall_f = 0;
-	uint8_t wall_r = 0;
-	uint8_t wall_l = 0;
+	DirType dir = N;
+	DirType nextDir;
+	uint8_t posx = 0;
+	uint8_t posy = 0;
+
+	float rotx_tmp;
+	float gx_tmp;
+
 
 	//zmienne do podglądu enkoderów
 	uint32_t prawy = 0;
@@ -223,15 +228,12 @@ int main(void)
 		//odczyt danych z mpu6050
 		//MPU6050_GetAccelerometerScaled(&ax, &ay, &az);
 		MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
-		temperature = MPU6050_GetTemperatureCelsius();
+		//temperature = MPU6050_GetTemperatureCelsius();
 
 		//odczyt z enkoderów
 		encRead();
 		prawy = leftTotal;
 		lewy = rightTotal;
-
-		//test portu szeregowego
-		printf("Hello world\n");
 
 		////////////////////////////////////////////////////
 		//tutaj test jazdy i obrotu
@@ -240,36 +242,70 @@ int main(void)
 
 		if (x == 0)
 		{
-			switch (x1)
+			nextDir = floodFill(posx, posy, dir);
+			if(dir == nextDir)
 			{
-			case 0:
-			{
-				x1 += turn_pid(rotx, -90000);
+				while(move_forward(168, 200) == 0);
 			}
-				break;
+			if((dir == N && nextDir == E) || (dir == E && nextDir == S) || (dir == S && nextDir == W ) || (dir == W && nextDir == N))
+			{
+				gx = 0;
+				rotx = 1;
+				while(turn_pid(rotx, -90000) == 0)
+				{
+					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
+					if(gx > 2 || gx < -2)
+					{
+						rotx += gx*(HAL_GetTick() - time_gyro);
+					}
+					time_gyro = HAL_GetTick();
+					rotx_tmp = rotx;
+					gx_tmp = gx;
+					HAL_Delay(10);
 
-			case 1:
-			{
-				x1 += move_forward(300, 200);
+				}
+				while(move_forward(168, 200) == 0);
+				dir = nextDir;
 			}
-				break;
+			if((dir == N && nextDir == W) || (dir == W && nextDir == S) || (dir == S && nextDir == E ) || (dir == E && nextDir == N))
+			{
+				gx = 0;
+				rotx = 1;
+				while(turn_pid(rotx, 90000) == 0)
+				{
+					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
+					if(gx > 2 || gx < -2)
+					{
+						rotx += gx*(HAL_GetTick() - time_gyro);
+					}
+					time_gyro = HAL_GetTick();
+					rotx_tmp = rotx;
+					gx_tmp = gx;
+					HAL_Delay(10);
 
-			case 2:
-			{
-				x1 += turn_pid(rotx, 90000);
+				}
+				while(move_forward(168, 200) == 0);
+				dir = nextDir;
 			}
-				break;
-			case 3:
+			if((dir == N && nextDir == S) || (dir == E && nextDir == W) || (dir == S && nextDir == N ) || (dir == W && nextDir == E))
 			{
-				x1 += move_forward(300, 200);
-			}
-				break;
+				gx = 0;
+				rotx = 1;
+				while(turn_pid(rotx, -180000) == 0)
+				{
+					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
+					if(gx > 2 || gx < -2)
+					{
+						rotx += gx*(HAL_GetTick() - time_gyro);
+					}
+					time_gyro = HAL_GetTick();
+					rotx_tmp = rotx;
+					gx_tmp = gx;
+					HAL_Delay(10);
 
-			case 4:
-			{
-				x1 = 0;
-			}
-				break;
+				}
+				while(move_forward(168, 200) == 0);
+				dir = nextDir;
 			}
 		}
 
@@ -278,13 +314,8 @@ int main(void)
 		{
 			HAL_Delay(500);
 			x = 0;
-			rotx = 0;
-			gx = 0;
 		}
 
-		wall_f = isWall(&ToF_F);
-		wall_r = isWall(&ToF_R);
-		wall_l = isWall(&ToF_L);
 
 		// koniec testu jazdy
 		////////////////////////////////////////////////////
