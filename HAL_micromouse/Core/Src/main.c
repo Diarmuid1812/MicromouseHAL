@@ -242,15 +242,24 @@ int main(void)
 
 		if (x == 0)
 		{
+			printf("posx = %d, posy = %d\n", posx, posy);
 			nextDir = floodFill(posx, posy, dir);
 			if(dir == nextDir)
 			{
 				while(move_forward(168, 200) == 0);
+				if(nextDir == N)
+					posy++;
+				if(nextDir == S)
+					posy--;
+				if(nextDir == E)
+					posx++;
+				if(nextDir == W)
+					posx--;
 			}
 			if((dir == N && nextDir == E) || (dir == E && nextDir == S) || (dir == S && nextDir == W ) || (dir == W && nextDir == N))
 			{
 				gx = 0;
-				rotx = 1;
+				rotx = 0;
 				while(turn_pid(rotx, -90000) == 0)
 				{
 					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
@@ -266,11 +275,20 @@ int main(void)
 				}
 				while(move_forward(168, 200) == 0);
 				dir = nextDir;
+
+				if(nextDir == N)
+					posy++;
+				if(nextDir == S)
+					posy--;
+				if(nextDir == E)
+					posx++;
+				if(nextDir == W)
+					posx--;
 			}
 			if((dir == N && nextDir == W) || (dir == W && nextDir == S) || (dir == S && nextDir == E ) || (dir == E && nextDir == N))
 			{
 				gx = 0;
-				rotx = 1;
+				rotx = 0;
 				while(turn_pid(rotx, 90000) == 0)
 				{
 					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
@@ -286,11 +304,20 @@ int main(void)
 				}
 				while(move_forward(168, 200) == 0);
 				dir = nextDir;
+
+				if(nextDir == N)
+					posy++;
+				if(nextDir == S)
+					posy--;
+				if(nextDir == E)
+					posx++;
+				if(nextDir == W)
+					posx--;
 			}
 			if((dir == N && nextDir == S) || (dir == E && nextDir == W) || (dir == S && nextDir == N ) || (dir == W && nextDir == E))
 			{
 				gx = 0;
-				rotx = 1;
+				rotx = 0;
 				while(turn_pid(rotx, -180000) == 0)
 				{
 					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
@@ -306,6 +333,15 @@ int main(void)
 				}
 				while(move_forward(168, 200) == 0);
 				dir = nextDir;
+
+				if(nextDir == N)
+					posy++;
+				if(nextDir == S)
+					posy--;
+				if(nextDir == E)
+					posx++;
+				if(nextDir == W)
+					posx--;
 			}
 		}
 
@@ -350,7 +386,8 @@ int main(void)
 		//tak powinna wyglądać przykładowa gotowa ramka -> "X_00012_00034_0023_0234_0433_3444_0003_1886576405"
 		makeFrame(frameWDS, lewy, prawy, dist_L_tmp, dist_FL_tmp, dist_F_tmp, dist_FR_tmp, dist_R_tmp);
 		//wysłanie ramki
-		printf("%s\n", frameWDS);
+		//printf("%s\n", frameWDS);
+
 
 		//pomiar czasu trwania całej pętli
 		uint32_t czas2 = HAL_GetTick() - czas1;
