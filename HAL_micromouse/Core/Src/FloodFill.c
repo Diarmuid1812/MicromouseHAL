@@ -111,37 +111,37 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 		else
 		{
 			minDist=255;
-			if(newY<255 && !(map[newX][newY].walls&(1u<<N)))
+			if(newY<LABIRYNTH_SIZE-1 && !(map[newX][newY].walls&(1u<<N)))
 			{
 				checkDist = map[newX][newY+1].distance;
-				if(checkDist < minDist) {minDist = checkDist; nextField=N;}
+				if(checkDist < minDist) minDist = checkDist;
 			}
-			if(newX<255 && !(map[newX][newY].walls&(1u<<E)))
+			if(newX<LABIRYNTH_SIZE-1 && !(map[newX][newY].walls&(1u<<E)))
 			{
 				checkDist = map[newX+1][newY].distance;
-				if(checkDist < minDist) {minDist = checkDist;nextField=E;}
+				if(checkDist < minDist) minDist = checkDist;
 			}
 			if(newY>0 && !(map[newX][newY].walls&(1u<<S)))
 			{
 				checkDist = map[newX][newY-1].distance;
-				if(checkDist < minDist) {minDist = checkDist; nextField=S;}
+				if(checkDist < minDist) minDist = checkDist;
 			}
 			if(newX>0 && !(map[newX][newY].walls&(1u<<W)))
 			{
 				checkDist = map[newX-1][newY].distance;
-				if(checkDist < minDist) {minDist = checkDist; nextField=W;}
+				if(checkDist < minDist) minDist = checkDist;
 			}
 
 		}
 	}
 
 	minDist=255;
-	if(newY<LABIRYNTH_SIZE && !(map[posX][posY].walls&(1u<<N)))
+	if(newY<LABIRYNTH_SIZE-1 && !(map[posX][posY].walls&(1u<<N)))
 	{
 		checkDist = map[posX][posY+1].distance;
 		if(checkDist < minDist) {minDist = checkDist; nextField=N;}
 	}
-	if(posX<LABIRYNTH_SIZE && !(map[posX+1][newY].walls&(1u<<E)))
+	if(posX<LABIRYNTH_SIZE-1 && !(map[posX+1][newY].walls&(1u<<E)))
 	{
 		checkDist = map[posX+1][posY].distance;
 		if(checkDist < minDist) {minDist = checkDist;nextField=E;}
