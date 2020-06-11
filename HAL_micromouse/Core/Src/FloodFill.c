@@ -83,12 +83,12 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 	uint8_t newY=0;
 	uint8_t minDist=255;
 	uint8_t checkDist=255;
-	DirType nextField=0;
+	DirType nextField=N;
 
 	FieldQue Q;
 	initQue(&Q);
 
-	enque(&Q, posX, posY);
+	enque(&Q, LABIRYNTH_SIZE-1, LABIRYNTH_SIZE-1);
 
 	if(posX==0&&posY==0)map[posX][posY].walls |= 1u<<S;
 	checkWalls(posX, posY, dir);

@@ -187,7 +187,7 @@ int main(void)
 	/************************************************************************/
 
 	//zapal LED
-	LED_ON();
+	LED_OFF();
 
 	//inicjalizacja czujników ToF
 	initMicromouseVL53L0x();
@@ -243,7 +243,9 @@ int main(void)
 		if (x == 0)
 		{
 			printf("posx = %d, posy = %d\n", posx, posy);
+
 			nextDir = floodFill(posx, posy, dir);
+			printf("dir = %d, nextDir = %d\n", dir, nextDir);
 			if(dir == nextDir)
 			{
 				while(move_forward(168, 200) == 0);
@@ -256,7 +258,7 @@ int main(void)
 				if(nextDir == W)
 					posx--;
 			}
-			if((dir == N && nextDir == E) || (dir == E && nextDir == S) || (dir == S && nextDir == W ) || (dir == W && nextDir == N))
+			else if((dir == N && nextDir == E) || (dir == E && nextDir == S) || (dir == S && nextDir == W ) || (dir == W && nextDir == N))
 			{
 				gx = 0;
 				rotx = 0;
@@ -285,7 +287,7 @@ int main(void)
 				if(nextDir == W)
 					posx--;
 			}
-			if((dir == N && nextDir == W) || (dir == W && nextDir == S) || (dir == S && nextDir == E ) || (dir == E && nextDir == N))
+			else if((dir == N && nextDir == W) || (dir == W && nextDir == S) || (dir == S && nextDir == E ) || (dir == E && nextDir == N))
 			{
 				gx = 0;
 				rotx = 0;
@@ -314,7 +316,7 @@ int main(void)
 				if(nextDir == W)
 					posx--;
 			}
-			if((dir == N && nextDir == S) || (dir == E && nextDir == W) || (dir == S && nextDir == N ) || (dir == W && nextDir == E))
+			else if((dir == N && nextDir == S) || (dir == E && nextDir == W) || (dir == S && nextDir == N ) || (dir == W && nextDir == E))
 			{
 				gx = 0;
 				rotx = 0;
@@ -343,6 +345,16 @@ int main(void)
 				if(nextDir == W)
 					posx--;
 			}
+			else
+			{
+				LED_ON();
+				printf("dir = %d, nextDir = %d\n", dir, nextDir);
+			}
+			if(posx == LABIRYNTH_SIZE-1 && posy == LABIRYNTH_SIZE-1)
+			{
+				x = 1;
+
+			}
 		}
 
 
@@ -351,6 +363,7 @@ int main(void)
 			HAL_Delay(500);
 			x = 0;
 		}
+
 
 
 		// koniec testu jazdy
@@ -368,11 +381,11 @@ int main(void)
 		}
 
 		//miganie diodą - nieblokujące
-		if ((HAL_GetTick() - time_blink) >= BLINK_INTERVAL)
-		{
-			LED_TOGGLE();
-			time_blink = HAL_GetTick();
-		}
+//		if ((HAL_GetTick() - time_blink) >= BLINK_INTERVAL)
+//		{
+//			LED_TOGGLE();
+//			time_blink = HAL_GetTick();
+//		}
 
 		//inkrementacja obrotu w zmierzonym oknie czasowym
 		if(gx > 2 || gx < -2)
