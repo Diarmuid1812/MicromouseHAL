@@ -16,11 +16,11 @@ void checkWalls(uint8_t posX, uint8_t posY, DirType direction)
 	if(isWall(&ToF_F))
 	{
 		map[posX][posY].walls |= 1u<<direction;
-		if(direction==N&&posY<LABIRYNTH_SIZE)
+		if(direction==N&&posY<LABIRYNTH_SIZE-1)
 		{
 			map[posX][posY+1].walls|=1u<<S;
 		}
-		if(direction==E&&posX<LABIRYNTH_SIZE)
+		if(direction==E&&posX<LABIRYNTH_SIZE-1)
 		{
 			map[posX+1][posY].walls|=1u<<W;
 		}
@@ -37,11 +37,11 @@ void checkWalls(uint8_t posX, uint8_t posY, DirType direction)
 	{
 
 		map[posX][posY].walls |= 1u<<dirR;
-		if(dirR==N&&posY<LABIRYNTH_SIZE)
+		if(dirR==N&&posY<LABIRYNTH_SIZE-1)
 		{
 			map[posX][posY+1].walls|=1u<<S;
 		}
-		if(dirR==E&&posX<LABIRYNTH_SIZE)
+		if(dirR==E&&posX<LABIRYNTH_SIZE-1)
 		{
 			map[posX+1][posY].walls|=1u<<W;
 		}
@@ -57,11 +57,11 @@ void checkWalls(uint8_t posX, uint8_t posY, DirType direction)
 	if(isWall(&ToF_L))
 	{
 		map[posX][posY].walls |= 1u<<dirL;
-		if(dirL==N&&posY<LABIRYNTH_SIZE)
+		if(dirL==N&&posY<LABIRYNTH_SIZE-1)
 		{
 			map[posX][posY+1].walls|=1u<<S;
 		}
-		if(dirL==E&&posX<LABIRYNTH_SIZE)
+		if(dirL==E&&posX<LABIRYNTH_SIZE-1)
 		{
 			map[posX+1][posY].walls|=1u<<W;
 		}
@@ -81,8 +81,8 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 {
 	uint8_t newX=0;
 	uint8_t newY=0;
-	uint8_t minDist=0;
-	uint8_t checkDist=0;
+	uint8_t minDist=255;
+	uint8_t checkDist=255;
 	DirType nextField=0;
 
 	FieldQue Q;
@@ -100,8 +100,8 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 		if(!map[newX][newY].visited)
 		{
 			map[newX][newY].visited = 1;
-			if(newY<LABIRYNTH_SIZE) if(!(map[newX][newY].walls&(1u<<N))) enque(&Q, newX , newY+1);
-			if(newX<LABIRYNTH_SIZE) if(!(map[newX][newY].walls&(1u<<E)))enque(&Q, newX+1, newY);
+			if(newY<LABIRYNTH_SIZE-1) if(!(map[newX][newY].walls&(1u<<N))) enque(&Q, newX , newY+1);
+			if(newX<LABIRYNTH_SIZE-1) if(!(map[newX][newY].walls&(1u<<E)))enque(&Q, newX+1, newY);
 			if(newY>0) if(!(map[newX][newY].walls&(1u<<S))) enque(&Q, newX , newY-1);
 			if(newX>0) if(!(map[newX][newY].walls&(1u<<W))) enque(&Q, newX-1, newY);
 		}
@@ -131,7 +131,7 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 				checkDist = map[newX-1][newY].distance;
 				if(checkDist < minDist) minDist = checkDist;
 			}
-
+			map[newX][newY].distance = minDist + 1;
 		}
 	}
 
@@ -141,7 +141,7 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 		checkDist = map[posX][posY+1].distance;
 		if(checkDist < minDist) {minDist = checkDist; nextField=N;}
 	}
-	if(posX<LABIRYNTH_SIZE-1 && !(map[posX+1][newY].walls&(1u<<E)))
+	if(posX<LABIRYNTH_SIZE-1 && !(map[posX][posY].walls&(1u<<E)))
 	{
 		checkDist = map[posX+1][posY].distance;
 		if(checkDist < minDist) {minDist = checkDist;nextField=E;}
@@ -157,8 +157,6 @@ DirType floodFill(uint8_t posX, uint8_t posY, DirType dir)
 		if(checkDist < minDist) {minDist = checkDist; nextField=W;}
 	}
 
-
-	map[newX][newY].distance = minDist + 1;
 	for(uint8_t j=0;j<LABIRYNTH_SIZE;++j)
 		for(uint8_t i=0;i<LABIRYNTH_SIZE;++i)
 			map[i][j].visited=0;
