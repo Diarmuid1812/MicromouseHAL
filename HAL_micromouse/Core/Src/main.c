@@ -49,6 +49,8 @@
 //wyższa matematyka
 #define PI 3.14159265359
 
+#define CELL_DIST 168
+
 
 //interwały zdarzań w pętli main w ms
 #define DIST_READ_INTERVAL 100
@@ -161,10 +163,6 @@ int main(void)
 	uint8_t posx = 0;
 	uint8_t posy = 0;
 
-	float rotx_tmp;
-	float gx_tmp;
-
-
 	//zmienne do podglądu enkoderów
 	uint32_t prawy = 0;
 	uint32_t lewy = 0;
@@ -238,7 +236,6 @@ int main(void)
 		////////////////////////////////////////////////////
 		//tutaj test jazdy i obrotu
 		static int x = 1;
-		static int x1 = 0;
 
 		if (x == 0)
 		{
@@ -248,7 +245,7 @@ int main(void)
 			printf("dir = %d, nextDir = %d\n", dir, nextDir);
 			if(dir == nextDir)
 			{
-				while(move_forward(168, 200) == 0);
+				while(move_forward(CELL_DIST, 200) == 0);
 				if(nextDir == N)
 					posy++;
 				if(nextDir == S)
@@ -262,7 +259,8 @@ int main(void)
 			{
 				gx = 0;
 				rotx = 0;
-				while(turn_pid(rotx, -90000) == 0)
+				//while(turn_pid(rotx, -90000) == 0)
+				while(turn_right(rotx, -90000, 120) == 0)
 				{
 					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
 					if(gx > 2 || gx < -2)
@@ -270,12 +268,10 @@ int main(void)
 						rotx += gx*(HAL_GetTick() - time_gyro);
 					}
 					time_gyro = HAL_GetTick();
-					rotx_tmp = rotx;
-					gx_tmp = gx;
 					HAL_Delay(10);
 
 				}
-				while(move_forward(168, 200) == 0);
+				while(move_forward(CELL_DIST, 200) == 0);
 				dir = nextDir;
 
 				if(nextDir == N)
@@ -291,7 +287,8 @@ int main(void)
 			{
 				gx = 0;
 				rotx = 0;
-				while(turn_pid(rotx, 90000) == 0)
+				//while(turn_pid(rotx, 90000) == 0)
+				while(turn_left(rotx, 90000, 120) == 0)
 				{
 					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
 					if(gx > 2 || gx < -2)
@@ -299,12 +296,10 @@ int main(void)
 						rotx += gx*(HAL_GetTick() - time_gyro);
 					}
 					time_gyro = HAL_GetTick();
-					rotx_tmp = rotx;
-					gx_tmp = gx;
 					HAL_Delay(10);
 
 				}
-				while(move_forward(168, 200) == 0);
+				while(move_forward(CELL_DIST, 200) == 0);
 				dir = nextDir;
 
 				if(nextDir == N)
@@ -320,7 +315,8 @@ int main(void)
 			{
 				gx = 0;
 				rotx = 0;
-				while(turn_pid(rotx, -180000) == 0)
+				//while(turn_pid(rotx, -180000) == 0)
+				while(turn_right(rotx, -180000, 120) == 0)
 				{
 					MPU6050_GetGyroscopeScaled(&gx, &gy, &gz);
 					if(gx > 2 || gx < -2)
@@ -328,12 +324,10 @@ int main(void)
 						rotx += gx*(HAL_GetTick() - time_gyro);
 					}
 					time_gyro = HAL_GetTick();
-					rotx_tmp = rotx;
-					gx_tmp = gx;
 					HAL_Delay(10);
 
 				}
-				while(move_forward(168, 200) == 0);
+				while(move_forward(CELL_DIST, 200) == 0);
 				dir = nextDir;
 
 				if(nextDir == N)
@@ -399,7 +393,7 @@ int main(void)
 		//tak powinna wyglądać przykładowa gotowa ramka -> "X_00012_00034_0023_0234_0433_3444_0003_1886576405"
 		makeFrame(frameWDS, lewy, prawy, dist_L_tmp, dist_FL_tmp, dist_F_tmp, dist_FR_tmp, dist_R_tmp);
 		//wysłanie ramki
-		//printf("%s\n", frameWDS);
+		printf("%s\n", frameWDS);
 
 
 		//pomiar czasu trwania całej pętli

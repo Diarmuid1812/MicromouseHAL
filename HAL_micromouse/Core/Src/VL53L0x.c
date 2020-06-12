@@ -737,7 +737,7 @@ void initMicromouseVL53L0x()
 
 uint8_t isWall(struct ToF_struct *ToF)
 {
-	if(ToF_readRangeContinuousMillimeters(ToF) < 90)
+	if(ToF_readRangeContinuousMillimeters(ToF) < 120)
 	{
 		return 1;
 	}
